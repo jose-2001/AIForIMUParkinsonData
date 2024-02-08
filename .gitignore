@@ -1,0 +1,5 @@
+#Exclude data folders
+data/
+
+#Enviroment variables
+enviroment/.env
