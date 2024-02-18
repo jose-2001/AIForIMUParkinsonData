@@ -1,9 +1,9 @@
 import pandas as pd
 from dotenv import load_dotenv
 from unidecode import unidecode
-from imu_helper import ImuData
-from firebase_json_downloader import get_data_summary, get_measurement
-from json_formater import imu_data2dataframe, measurement_has_valid_keys
+from src.data.imu_helper import ImuData
+from src.data.firebase_json_downloader import get_data_summary, get_measurement
+from src.data.json_formater import imu_data2dataframe, measurement_has_valid_keys
 from src.utils.basic_imu_data_attributes import IMU_DATA_ATTRIBUTES
 
 

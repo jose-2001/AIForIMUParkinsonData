@@ -2,9 +2,9 @@ import os
 from dotenv import load_dotenv
 from src.utils.imu_extremities import Joint, ImuComponents
 import numpy as np
-from json_formater import get_joint_data, get_joint_dimension
-from signal_filter import (low_pass_filter, roll_derivative, pitch_derivative, yaw_derivative, interpolar,
-                           correct_angular_acc_x, calculate_angular_acc, CONVERSION_FACTOR)
+from src.data.json_formater import get_joint_data, get_joint_dimension
+from src.data.signal_filter import (low_pass_filter, roll_derivative, pitch_derivative, yaw_derivative, interpolar,
+                                    correct_angular_acc_x, calculate_angular_acc, CONVERSION_FACTOR)
 
 load_dotenv()
 DATABASE_URL = os.environ.get('DATABASE_URL')
