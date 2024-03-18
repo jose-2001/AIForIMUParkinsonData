@@ -8,10 +8,13 @@ TRAIN_PERCENTAGE = 0.75
 VAL_PERCENTAGE = 0.15
 TEST_PERCENTAGE = 0.1
 
+SEED = 11
+
 
 def save_and_split(df: DataFrame, module: str):
-    train, test = train_test_split(df, test_size=1 - TRAIN_PERCENTAGE)
-    val, test = train_test_split(test, test_size=TEST_PERCENTAGE/(TEST_PERCENTAGE + VAL_PERCENTAGE))
+    train, test = train_test_split(df, test_size=1 - TRAIN_PERCENTAGE, random_state=SEED)
+    val, test = train_test_split(test, test_size=TEST_PERCENTAGE/(TEST_PERCENTAGE + VAL_PERCENTAGE),
+                                 random_state=SEED)
 
     filename = module + '/train'
     write_pickle(filename + '.pkl', train)
