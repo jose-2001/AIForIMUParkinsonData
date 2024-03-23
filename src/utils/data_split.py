@@ -1,4 +1,5 @@
 import pickle
+from pathlib import Path
 
 from pandas import DataFrame
 import numpy as np
@@ -19,19 +20,21 @@ def save_and_split(df: DataFrame, module: str):
     val, test = train_test_split(test, test_size=TEST_PERCENTAGE/(TEST_PERCENTAGE + VAL_PERCENTAGE),
                                  random_state=SEED)
 
-    filename = module + '/train'
-    write_pickle(filename + '.pkl', train)
-    DataFrame(train).to_csv(PROCESSED_PATH / filename + '.csv')
+    train = DataFrame(train)
+    test = DataFrame(test)
+    val = DataFrame(val)
 
-    filename = module + '/test'
-    write_pickle(filename + '.pkl', test)
-    DataFrame(test).to_csv(PROCESSED_PATH / filename + '.csv')
-
-    filename = module + '/val'
-    write_pickle(filename + '.pkl', val)
-    DataFrame(val).to_csv(PROCESSED_PATH / filename + '.csv')
+    __write_files('train', module, train)
+    __write_files('test', module, test)
+    __write_files('val', module, val)
 
 
-def write_pickle(filename: str, variable: np.array) -> None:
-    with open(PROCESSED_PATH / filename, 'x') as file:
-        pickle.dump(variable, file)
+def __write_files(type_set: str, module: str, df: DataFrame):
+    filename_pkl: Path = Path(type_set + '.pkl')
+    filename_csv = type_set + '.csv'
+
+    path_pkl = PROCESSED_PATH / module / filename_pkl
+    path_csv = PROCESSED_PATH / module / filename_csv
+
+    df.to_pickle(path_pkl)
+    df.to_csv(path_csv)
