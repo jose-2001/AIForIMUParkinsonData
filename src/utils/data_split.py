@@ -1,3 +1,4 @@
+import os
 import pickle
 from pathlib import Path
 
@@ -16,9 +17,7 @@ PROCESSED_PATH = ROOT_DIR / 'data' / 'processed'
 
 
 def save_and_split(df: DataFrame, module: str):
-    train, test = train_test_split(df, test_size=1 - TRAIN_PERCENTAGE, random_state=SEED)
-    val, test = train_test_split(test, test_size=TEST_PERCENTAGE/(TEST_PERCENTAGE + VAL_PERCENTAGE),
-                                 random_state=SEED)
+    train, test, val = __get_train_test_val(df)
 
     train = DataFrame(train)
     test = DataFrame(test)
@@ -27,6 +26,34 @@ def save_and_split(df: DataFrame, module: str):
     __write_files('train', module, train)
     __write_files('test', module, test)
     __write_files('val', module, val)
+
+
+def save_and_split_sequences(sequence: list, module: str):
+    train, test, val = __get_train_test_val(sequence)
+    sets = {
+        'train': train,
+        'test': test,
+        'val': val
+    }
+
+    for value in sets:
+        filename_pkl: Path = Path(value + '.pkl')
+        path: Path = PROCESSED_PATH / module / filename_pkl
+
+        if os.path.exists(path):
+            with open(str(path), 'wb') as f:
+                pickle.dump(sets[value], f)
+        else:
+            print('here')
+            with open(str(path), 'w+') as f:
+                pickle.dump(sets[value], f)
+
+
+def __get_train_test_val(data: any):
+    train, test = train_test_split(data, test_size=1 - TRAIN_PERCENTAGE, random_state=SEED)
+    val, test = train_test_split(test, test_size=TEST_PERCENTAGE/(TEST_PERCENTAGE + VAL_PERCENTAGE),
+                                 random_state=SEED)
+    return train, test, val
 
 
 def __write_files(type_set: str, module: str, df: DataFrame):
