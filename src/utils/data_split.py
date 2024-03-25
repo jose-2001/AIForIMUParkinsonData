@@ -2,6 +2,7 @@ import os
 import pickle
 from pathlib import Path
 
+import tensorflow as tf
 from pandas import DataFrame
 import numpy as np
 from sklearn.model_selection import train_test_split
@@ -44,15 +45,24 @@ def save_and_split_sequences(sequence: list, module: str):
             with open(str(path), 'wb') as f:
                 pickle.dump(sets[value], f)
         else:
-            print('here')
-            with open(str(path), 'w+') as f:
+            with open(str(path), 'wb') as f:
                 pickle.dump(sets[value], f)
 
 
+def get_features_target(sequence: list) -> tuple:
+    features = []
+    target = []
+    for value in sequence:
+        features.append(value[0])
+        target.append(value[1])
+
+    return features, target
+
+
 def __get_train_test_val(data: any):
-    train, test = train_test_split(data, test_size=1 - TRAIN_PERCENTAGE, random_state=SEED)
+    train, test = train_test_split(data, test_size=1 - TRAIN_PERCENTAGE, random_state=SEED, shuffle=True)
     val, test = train_test_split(test, test_size=TEST_PERCENTAGE/(TEST_PERCENTAGE + VAL_PERCENTAGE),
-                                 random_state=SEED)
+                                 random_state=SEED, shuffle=True)
     return train, test, val
 
 
