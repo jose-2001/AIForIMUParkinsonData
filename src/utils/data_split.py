@@ -50,11 +50,8 @@ def save_and_split_sequences(sequence: list, module: str):
 
 
 def get_features_target(sequence: list) -> tuple:
-    features = []
-    target = []
-    for value in sequence:
-        features.append(value[0])
-        target.append(value[1])
+    features = [values for values, _ in sequence]
+    target = np.array([label for _, label in sequence])
 
     return features, target
 
