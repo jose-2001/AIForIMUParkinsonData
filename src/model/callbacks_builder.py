@@ -35,4 +35,5 @@ def build_early_stopping():
 def build_tensorboard(module: str):
     log_dir = str(ROOT_DIR) + f'/results/{module}/lightning_logs' + datetime.datetime.now().strftime("%Y%m%d-%H%M%S")
     tensorboard_callback = TensorBoard(log_dir=log_dir , histogram_freq=1)
+    return tensorboard_callback
 
