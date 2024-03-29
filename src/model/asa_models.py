@@ -32,8 +32,6 @@ def build_2layer_lstm(hp) -> Sequential:
     model.add(LSTM(128, return_sequences=True))
     hp_units = hp.Int('units_hp', min_value=32, max_value=256, step=32)
     model.add(LSTM(hp_units, return_sequences=True))
-    hp_dense_units = hp.Int('dense_units_hp', min_value=32, max_value=128, step=32)
-    model.add(Dense(units=hp_dense_units, activation='relu'))
     model.add(Dense(units=1, activation=DEFAULT_ACTIVATION_FUNCTION))
 
     opt = Adam(learning_rate=DEFAULT_LEARNING_RATE)
