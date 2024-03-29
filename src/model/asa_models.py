@@ -75,11 +75,15 @@ def build_1d_conv_2layer_lstm_do(hp) -> Sequential:
     model = Sequential()
     model.add(InputLayer(input_shape=INPUT_SHAPE))
     # TODO: Add neurons according to results of previous models
-    model.add(model.add(Conv1D(filters=0, kernel_size=0, strides=1, padding='causal', activation='relu')))
+    model.add(model.add(Conv1D(filters=13, kernel_size=5, strides=1, padding='causal', activation='relu')))
     model.add(LSTM(128, return_sequences=True))
-    model.add(Dropout(rate=0.2))
-    model.add(LSTM(256, return_sequences=True))
-    model.add(Dropout(rate=0.2))
+
+    hp_do1 = hp.Float('hp_do1', min_value=0.2, max_value=0.8, step=0.05)
+    model.add(Dropout(rate=hp_do1))
+    model.add(LSTM(128, return_sequences=True))
+
+    hp_do2 = hp.Float('hp_do2', min_value=0.2, max_value=0.8, step=0.05)
+    model.add(Dropout(rate=hp_do2))
     model.add(Dense(units=1, activation='sigmoid'))
 
     opt = Adam(learning_rate=DEFAULT_LEARNING_RATE)
