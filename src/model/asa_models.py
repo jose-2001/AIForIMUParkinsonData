@@ -65,7 +65,7 @@ def build_1d_conv_1lstm(hp) -> Sequential:
 def build_1d_conv_1layer_lstm_do(hp) -> Sequential:
     model = Sequential()
     model.add(InputLayer(input_shape=INPUT_SHAPE))
-    model.add(model.add(Conv1D(filters=9, kernel_size=8, strides=1, padding='causal', activation='relu')))
+    model.add(Conv1D(filters=9, kernel_size=8, strides=1, padding='causal', activation='relu'))
 
     hp_do = hp.Float('hp_do', min_value=0.2, max_value=0.8, step=0.05)
     model.add(LSTM(128, return_sequences=True, dropout=hp_do))
