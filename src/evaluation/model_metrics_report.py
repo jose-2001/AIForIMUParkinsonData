@@ -13,7 +13,7 @@ def print_model_metrics(model, x_test: np.ndarray, y_test: np.ndarray):
     print(classification_report(y_test, y_pred_binary))
     _get_auc_roc(y_test, y_pred)
     _get_auc_pr(y_test, y_pred)
-    plot_roc_curve(y_test, y_pred_binary)
+    plot_roc_curve(y_test, y_pred)
     plot_pr_curve(y_test, y_pred)
     plot_confusion_matrix(y_test, y_pred_binary)
 
