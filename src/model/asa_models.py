@@ -31,7 +31,7 @@ def build_2layer_lstm(hp) -> Sequential:
     model.add(InputLayer(input_shape=INPUT_SHAPE))
     model.add(LSTM(128, return_sequences=True))
     hp_units = hp.Int('units_hp', min_value=32, max_value=256, step=32)
-    model.add(LSTM(hp_units, return_sequences=True))
+    model.add(LSTM(hp_units))
     model.add(Dense(units=1, activation=DEFAULT_ACTIVATION_FUNCTION))
 
     opt = Adam(learning_rate=DEFAULT_LEARNING_RATE)
@@ -50,7 +50,7 @@ def build_1d_conv_1lstm(hp) -> Sequential:
     hp_kernel = hp.Int('kernel_hp', min_value=8, max_value=64, step=8)
     model.add(Conv1D(filters=hp_filters, kernel_size=hp_kernel, strides=1, padding='causal', activation='relu'))
 
-    model.add(LSTM(128, return_sequences=True))
+    model.add(LSTM(128))
     model.add(Dense(units=1, activation='sigmoid'))
 
     opt = Adam(learning_rate=DEFAULT_LEARNING_RATE)
@@ -68,7 +68,7 @@ def build_1d_conv_1layer_lstm_do(hp) -> Sequential:
     model.add(Conv1D(filters=9, kernel_size=8, strides=1, padding='causal', activation='relu'))
 
     hp_do = hp.Float('hp_do', min_value=0.2, max_value=0.8, step=0.05)
-    model.add(LSTM(128, return_sequences=True, dropout=hp_do))
+    model.add(LSTM(128, dropout=hp_do))
 
     model.add(Dense(units=1, activation='sigmoid'))
     opt = Adam(learning_rate=DEFAULT_LEARNING_RATE)
