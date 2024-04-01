@@ -4,9 +4,16 @@ from sklearn.metrics import classification_report, roc_auc_score, roc_curve, pre
 import matplotlib.pyplot as plt
 
 
-def print_model_metrics(model, x_test: np.ndarray, y_test: np.ndarray):
+def print_model_metrics(model, x_test: np.ndarray, y_test: np.ndarray, contains_conv: bool = False):
 
     y_pred = model.predict(x_test)
+
+    if contains_conv:
+        arr = []
+        for sample in y_pred:
+            arr.append(sample[1])
+        y_pred = np.array(arr)
+
     y_pred_binary = np.argmax(y_pred, axis=1)
 
     _get_accuracy(y_test, y_pred_binary)
