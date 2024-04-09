@@ -1,6 +1,7 @@
 import numpy as np
 import seaborn as sns
-from sklearn.metrics import classification_report, roc_auc_score, roc_curve, precision_recall_curve, auc, confusion_matrix
+from sklearn.metrics import (classification_report, roc_auc_score, roc_curve, precision_recall_curve, auc,
+                             confusion_matrix, cohen_kappa_score)
 import matplotlib.pyplot as plt
 
 
@@ -17,6 +18,7 @@ def print_model_metrics(model, x_test: np.ndarray, y_test: np.ndarray, contains_
     y_pred_binary = np.argmax(y_pred, axis=1)
 
     _get_accuracy(y_test, y_pred_binary)
+    print(cohen_kappa_score(y_test, y_pred_binary))
     print(classification_report(y_test, y_pred_binary))
     _get_auc_roc(y_test, y_pred)
     _get_auc_pr(y_test, y_pred)
