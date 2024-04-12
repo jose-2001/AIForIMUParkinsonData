@@ -15,7 +15,7 @@ def print_model_metrics(model, x_test: np.ndarray, y_test: np.ndarray, contains_
             arr.append(sample[1])
         y_pred = np.array(arr)
 
-    y_pred_binary = np.argmax(y_pred, axis=1)
+    y_pred_binary = np.argmax(y_pred)
 
     _get_accuracy(y_test, y_pred_binary)
     print(cohen_kappa_score(y_test, y_pred_binary))
@@ -25,6 +25,28 @@ def print_model_metrics(model, x_test: np.ndarray, y_test: np.ndarray, contains_
     plot_roc_curve(y_test, y_pred)
     plot_pr_curve(y_test, y_pred)
     plot_confusion_matrix(y_test, y_pred_binary)
+
+
+def print_sklearn_model_metrics(model, x_test: np.ndarray, y_test: np.ndarray):
+
+    y_pred = model.predict(x_test)
+
+    _get_accuracy(y_test, y_pred)
+    print(cohen_kappa_score(y_test, y_pred))
+    print(classification_report(y_test, y_pred))
+
+    auc_roc = roc_auc_score(y_test, y_pred)
+    print("AUC-ROC:", auc_roc)
+
+    fpr, tpr, _ = roc_curve(y_test, y_pred)
+    roc_auc = auc(fpr, tpr)
+
+    precision, recall, _ = precision_recall_curve(y_test, y_pred)
+    auc_pr = auc(recall, precision)
+    print("AUC-PR:", auc_pr)
+    plot_roc_curve_sklearn(y_test, y_pred)
+    plot_pr_curve_sklearn(y_test, y_pred)
+    plot_confusion_matrix(y_test, y_pred)
 
 
 def _get_accuracy(y_test: np.ndarray, y_pred: np.ndarray):
@@ -70,8 +92,35 @@ def plot_pr_curve(y_test: np.ndarray, y_pred: np.ndarray):
     plt.show()
 
 
+def plot_pr_curve_sklearn(y_test: np.ndarray, y_pred: np.ndarray):
+    precision, recall, _ = precision_recall_curve(y_test, y_pred)
+    auc_pr = auc(recall, precision)
+    plt.figure()
+    plt.plot(recall, precision, color='blue', lw=2, label='Precision-Recall curve (area = %0.2f)' % auc_pr)
+    plt.xlabel('Recall')
+    plt.ylabel('Precision')
+    plt.title('Precision-Recall Curve')
+    plt.legend(loc="lower left")
+    plt.show()
+
+
 def plot_roc_curve(y_test: np.ndarray, y_pred: np.ndarray):
     fpr, tpr, _ = roc_curve(y_test, y_pred[:, 0])
+    roc_auc = auc(fpr, tpr)
+    plt.figure()
+    plt.plot(fpr, tpr, color='darkorange', lw=2, label='ROC curve (area = %0.2f)' % roc_auc)
+    plt.plot([0, 1], [0, 1], color='navy', lw=2, linestyle='--')
+    plt.xlim([0.0, 1.0])
+    plt.ylim([0.0, 1.05])
+    plt.xlabel('False Positive Rate')
+    plt.ylabel('True Positive Rate')
+    plt.title('Receiver Operating Characteristic Curve')
+    plt.legend(loc="lower right")
+    plt.show()
+
+
+def plot_roc_curve_sklearn(y_test: np.ndarray, y_pred: np.ndarray):
+    fpr, tpr, _ = roc_curve(y_test, y_pred)
     roc_auc = auc(fpr, tpr)
     plt.figure()
     plt.plot(fpr, tpr, color='darkorange', lw=2, label='ROC curve (area = %0.2f)' % roc_auc)
