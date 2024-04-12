@@ -24,8 +24,11 @@ def __train_svm(x, y):
         'kernel': ['rbf', 'poly', 'sigmoid'],
         'C': [1, 10, 100, 1000]
     }
-    clf = GridSearchCV(svm, parameters)
+    print('Started Grid Search - Model: SVM')
+    clf = GridSearchCV(svm, parameters, n_jobs=-1, verbose=4)
     clf.fit(x, y)
+    print("Best parameters SVM: {}".format(clf.best_params_))
+    print('Finished Grid Search - Model: SVM')
     return clf
 
 
@@ -35,20 +38,26 @@ def __train_knn(x, y):
         'n_neighbors': [3, 5, 7, 11],
         'weights': ['uniform', 'distance']
     }
-    clf = GridSearchCV(knn, parameters)
+    print('Started Grid Search - Model: KNN')
+    clf = GridSearchCV(knn, parameters, n_jobs=-1, verbose=4)
     clf.fit(x, y)
+    print("Best parameters KNN: {}".format(clf.best_params_))
+    print('Finished Grid Search - Model: KNN')
     return clf
 
 
 def __train_gboost(x, y):
     gboost = GradientBoostingClassifier()
     parameters = {
-        'learning_rate': [0.1, 0.01, 0.001, 0.0001],
-        'n_estimators': [24, 48, 64, 128],
+        'learning_rate': [0.1, 0.01, 0.001],
+        'n_estimators': [24, 48, 64],
         'n_iter_no_change': [20]
     }
-    clf = GridSearchCV(gboost, parameters)
+    print('Started Grid Search - Model: Gradient Boosting Classifier')
+    clf = GridSearchCV(gboost, parameters, n_jobs=-1, verbose=4)
     clf.fit(x, y)
+    print("Best parameters Gradient Boosting Classifier: {}".format(clf.best_params_))
+    print('Finished Grid Search - Model: Gradient Boosting Classifier')
     return clf
 
 
@@ -63,6 +72,6 @@ def __train_rf(x, y):
     parameters = {
         'n_estimators': [100, 150, 200, 300]
     }
-    clf = GridSearchCV(rf, parameters)
+    clf = GridSearchCV(rf, parameters, n_jobs=-1, verbose=4)
     clf.fit(x, y)
     return clf
