@@ -27,7 +27,7 @@ def print_model_metrics(model, x_test: np.ndarray, y_test: np.ndarray, contains_
     plot_confusion_matrix(y_test, y_pred_binary)
 
 
-def print_sklearn_model_metrics(model, x_test: np.ndarray, y_test: np.ndarray):
+def print_sklearn_model_metrics(model, x_test: np.ndarray, y_test: np.ndarray, multiclass: bool = False):
 
     y_pred = model.predict(x_test)
 
@@ -35,17 +35,25 @@ def print_sklearn_model_metrics(model, x_test: np.ndarray, y_test: np.ndarray):
     print(cohen_kappa_score(y_test, y_pred))
     print(classification_report(y_test, y_pred))
 
-    auc_roc = roc_auc_score(y_test, y_pred)
+    if multiclass:
+        y_pred_proba = model.predict_proba(x_test)
+        auc_roc = roc_auc_score(y_test, y_pred_proba, multi_class="ovr")
+    else:
+        auc_roc = roc_auc_score(y_test, y_pred)
+
     print("AUC-ROC:", auc_roc)
 
-    fpr, tpr, _ = roc_curve(y_test, y_pred)
-    roc_auc = auc(fpr, tpr)
+    if not multiclass:
+        fpr, tpr, _ = roc_curve(y_test, y_pred)
+        roc_auc = auc(fpr, tpr)
 
-    precision, recall, _ = precision_recall_curve(y_test, y_pred)
-    auc_pr = auc(recall, precision)
-    print("AUC-PR:", auc_pr)
-    plot_roc_curve_sklearn(y_test, y_pred)
-    plot_pr_curve_sklearn(y_test, y_pred)
+        precision, recall, _ = precision_recall_curve(y_test, y_pred)
+        auc_pr = auc(recall, precision)
+        print("AUC-PR:", auc_pr)
+
+        plot_roc_curve_sklearn(y_test, y_pred)
+        plot_pr_curve_sklearn(y_test, y_pred)
+
     plot_confusion_matrix(y_test, y_pred)
 
 
