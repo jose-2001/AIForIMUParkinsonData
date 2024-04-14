@@ -21,7 +21,7 @@ def build_models_general_classifier(x, y):
 
 
 def __train_svm(x, y):
-    svm = SVC()
+    svm = SVC(probability=True)
     parameters = {
         'kernel': ['rbf', 'poly', 'sigmoid'],
         'C': [1, 10, 100, 1000]
