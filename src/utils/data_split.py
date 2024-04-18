@@ -2,7 +2,6 @@ import os
 import pickle
 from pathlib import Path
 
-import tensorflow as tf
 from pandas import DataFrame
 import numpy as np
 from sklearn.model_selection import train_test_split
