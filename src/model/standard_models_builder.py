@@ -7,6 +7,7 @@ from sklearn.model_selection import GridSearchCV
 
 N_JOBS = 7
 
+
 def build_models_modules(x, y):
     svm = __train_svm(x, y)
     knn = __train_knn(x, y)
@@ -65,8 +66,16 @@ def __train_gboost(x, y):
 
 def __train_dt(x, y):
     dt = DecisionTreeClassifier()
-    dt.fit(x, y)
-    return dt
+    parameters = {
+        'criterion': ['gini', 'entropy'],
+        'max_depth': [2, 4, 6, 8, 12, 16, 24]
+    }
+    print('Started Grid Search - Model: Decision Tree Classifier')
+    clf = GridSearchCV(dt, param_grid=parameters, n_jobs=N_JOBS, verbose=4)
+    clf.fit(x, y)
+    print("Best parameters Decision Tree Classifier: {}".format(clf.best_params_))
+    print('Finished Grid Search - Model: Decision Tree Classifier')
+    return clf
 
 
 def __train_rf(x, y):
@@ -74,6 +83,9 @@ def __train_rf(x, y):
     parameters = {
         'n_estimators': [100, 150, 200, 300]
     }
+    print('Started Grid Search - Model: Random Forest Classifier')
     clf = GridSearchCV(rf, param_grid=parameters, n_jobs=N_JOBS, verbose=4)
     clf.fit(x, y)
+    print("Best parameters Random Forest Classifier: {}".format(clf.best_params_))
+    print('Finished Grid Search - Model: Random Forest')
     return clf
