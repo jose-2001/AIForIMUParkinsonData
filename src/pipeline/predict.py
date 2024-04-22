@@ -8,7 +8,7 @@ from src.settings import ROOT_DIR
 from src.data.imu_helper import ImuData
 from src.data.firebase_json_downloader import get_measurement, get_data_summary
 from src.data.json_formater import imu_data2dataframe, measurement_has_valid_keys
-
+from src.data.characteristics_extraction import generar_nombres_columnas, extraer_caracteristicas
 
 def execute_prediction(patient_id: str):
     dates = _get_patient_measurement_dates(patient_id)
@@ -24,6 +24,9 @@ def execute_prediction(patient_id: str):
         measure = get_measurement(unidecode(patient_id), date)
         patient_df = _from_measure2dataframe(patient_id, date, measure)
         print(patient_df)
+        df_columns = generar_nombres_columnas()
+        patient_df_charac = pd.DataFrame(columns=df_columns)
+        patient_df_charac = extraer_caracteristicas(patient_df,patient_df_charac)
 
 
 def _from_measure2dataframe(patient_id: str, date: str, measure: dict) -> pd.DataFrame:
