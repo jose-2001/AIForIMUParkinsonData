@@ -41,22 +41,29 @@ def calcular_medidas_estadisticas(columna):
     return medidas
 
 
-def generar_nombres_columnas(columnas_sensores=None, medidas_estadisticas=None):
+def generar_nombres_columnas(columnas_sensores=None, medidas_estadisticas=None, preprocessing: bool = True):
     if columnas_sensores is None:
         columnas_sensores = columnas_sensores_default
     if medidas_estadisticas is None:
         medidas_estadisticas = medidas_estadisticas_default
 
-    nombres_columnas = ['anon_id', 'date_measure', 'window_number', 'first_timestamp']
+    nombres_columnas = ['date_measure', 'window_number', 'first_timestamp']
+    if preprocessing:
+        nombres_columnas.append('anon_id')
+
     for columna in columnas_sensores:
         for medida in medidas_estadisticas:
             nombre_columna = f"{columna}_{medida}"
             nombres_columnas.append(nombre_columna)
-    nombres_columnas.append("PD")
+
+    if preprocessing:
+        nombres_columnas.append('PD')
+
     return nombres_columnas
 
 
-def extraer_caracteristicas(data, df_ventanas, longitud_ventana_s=None, frecuencia_muestreo=None, overlap=None):
+def extraer_caracteristicas(data, df_ventanas, longitud_ventana_s=None, frecuencia_muestreo=None, overlap=None,
+                            preprocessing: bool = True):
     if longitud_ventana_s is None:
         longitud_ventana_s = longitud_ventana_s_default
     if frecuencia_muestreo is None:
@@ -72,34 +79,45 @@ def extraer_caracteristicas(data, df_ventanas, longitud_ventana_s=None, frecuenc
         primera_fila_ventana = data.iloc[i]
 
         # Seleccionar los valores relevantes de la fila
-        anon_id = primera_fila_ventana['anon_id']
+        anon_id, PD = None, None
         date_measure = primera_fila_ventana['date_measure']
-        PD = primera_fila_ventana['PD']
         first_timestamp = primera_fila_ventana['time_stamp']
+        if preprocessing:
+            anon_id = primera_fila_ventana['anon_id']
+            PD = primera_fila_ventana['PD']
 
         # Seleccionar la ventana incluyendo tanto los valores de los sensores como los metadatos
         ventana = data.iloc[i:i + filas_por_ventana]
 
         # Verificar si los valores en la primera y última fila de la ventana son iguales
-        while len(ventana) > 1 and not ventana.iloc[0][['anon_id', 'date_measure', 'PD']].equals(ventana.iloc[-1][['anon_id', 'date_measure', 'PD']]):
+        comparable_columns = ['date_measure']
+        if preprocessing:
+            comparable_columns = comparable_columns + ['anon_id', 'PD']
+
+        while len(ventana) > 1 and not ventana.iloc[0][comparable_columns].equals(ventana.iloc[-1][comparable_columns]):
             ventana = ventana.iloc[:-1]  # Reducir la longitud de la ventana eliminando la última fila
 
         # Si la ventana se vacía pero aún no se cumple la condición, salir del bucle
-        if len(ventana) == 1 and not ventana.iloc[0][['anon_id', 'date_measure', 'PD']].equals(
-            ventana.iloc[-1][['anon_id', 'date_measure', 'PD']]):
+        if len(ventana) == 1 and not ventana.iloc[0][comparable_columns].equals(ventana.iloc[-1][comparable_columns]):
             break
 
         # Eliminar los valores de 'anon_id','date_measure'y'PD' de la ventana antes de calcular las medidas estadísticas
-        ventana_valores_sensor = ventana.drop(['anon_id', 'date_measure', 'time_stamp', 'PD'], axis=1)
+        if preprocessing:
+            ventana_valores_sensor = ventana.drop(['anon_id', 'date_measure', 'time_stamp', 'PD'], axis=1)
+        else:
+            ventana_valores_sensor = ventana.drop(['patient_id', 'date_measure', 'time_stamp'], axis=1)
 
         # Calcular las medidas estadísticas de la ventana para cada columna
         datos_ventana = {
-            'anon_id': anon_id,
             'date_measure': date_measure,
             'window_number': window_number,
-            'first_timestamp': first_timestamp,
-            'PD': PD
+            'first_timestamp': first_timestamp
         }
+
+        if preprocessing:
+            datos_ventana['anon_id'] = anon_id
+            datos_ventana['PD'] = PD
+
         for sensor_col in ventana_valores_sensor.columns:
             medidas = calcular_medidas_estadisticas(ventana_valores_sensor[sensor_col])
             for medida, medida_valor in medidas.items():
