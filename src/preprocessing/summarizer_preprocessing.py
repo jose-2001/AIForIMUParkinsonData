@@ -42,7 +42,17 @@ MODELS_FEATURES = {
 MODELS_NAMES = {
     'svm': 'model.svm.pkl',
     'knn': 'model.knn.pkl',
-    'gboost': 'model.gboost.pkl'
+    'gboost': 'model.gboost.pkl',
+    'dt': 'model.dt.pkl',
+    'rf': 'model.rf.pkl'
+}
+
+BEST_MODEL_BY_SYMPTOM = {
+    'tremor': 'knn',
+    'posture': 'knn',
+    'laterality': 'knn',
+    'asa': 'knn',
+    'dysk': 'knn'
 }
 
 
