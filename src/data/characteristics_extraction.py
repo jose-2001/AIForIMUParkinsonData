@@ -19,6 +19,37 @@ default_sampling_frequency = 50  # Hz
 default_window_length_s = 1  # seconds
 default_overlap = 0.5  # 50%
 
+'''
+.. function:: calculate_statistical_measures(column)
+
+   Calculate statistical measures for the given column.
+
+   :param column: A pandas Series representing the column for which statistical measures are calculated.
+   :type column: pandas.Series
+
+   :return: A dictionary containing various statistical measures.
+   :rtype: dict
+
+   This function calculates the following statistical measures for the given column:
+
+   - **mean**: Mean of the column.
+   - **std**: Standard deviation of the column.
+   - **mean_abs_dev**: Mean absolute deviation of the column.
+   - **min**: Minimum value of the column.
+   - **max**: Maximum value of the column.
+   - **range**: Range of the column (max - min).
+   - **median**: Median of the column.
+   - **median_abs_dev**: Median absolute deviation of the column.
+   - **interquartile_range**: Interquartile range (75th percentile - 25th percentile) of the column.
+   - **negative_count**: Number of negative values in the column.
+   - **positive_count**: Number of positive values in the column.
+   - **above_mean_count**: Number of values above the mean of the column.
+   - **local_maxima_count**: Number of local maxima in the column.
+   - **skewness**: Skewness of the column.
+   - **kurtosis**: Kurtosis of the column.
+
+'''
+
 
 def calculate_statistical_measures(column):
     measures = {
@@ -41,6 +72,31 @@ def calculate_statistical_measures(column):
     return measures
 
 
+'''
+.. function:: generate_column_names(sensor_columns=None, statistical_measures=None, preprocessing: bool = True)
+
+   Generate column names for sensor data.
+
+   :param sensor_columns: A list of sensor column names.
+   :type sensor_columns: list, optional
+   :param statistical_measures: A list of statistical measures to be calculated for each sensor column.
+   :type statistical_measures: list, optional
+   :param preprocessing: A boolean indicating whether preprocessing columns should be included.
+   :type preprocessing: bool, optional
+   :return: A list of column names.
+   :rtype: list
+
+   This function generates column names for sensor data based on the specified sensor columns and statistical measures. By default, it includes preprocessing columns.
+   If ``preprocessing`` is set to ``False``, the function excludes preprocessing columns:
+
+   Example::
+
+      >>> generate_column_names(sensor_columns=['acceleration', 'temperature'], statistical_measures=['mean', 'std'], preprocessing=False)
+      ['date_measure', 'window_number', 'first_timestamp', 'acceleration_mean', 'acceleration_std', 'temperature_mean', 'temperature_std']
+
+'''
+
+
 def generate_column_names(sensor_columns=None, statistical_measures=None, preprocessing: bool = True):
     if sensor_columns is None:
         sensor_columns = default_sensor_columns
@@ -60,6 +116,38 @@ def generate_column_names(sensor_columns=None, statistical_measures=None, prepro
         column_names.append('PD')
 
     return column_names
+
+
+'''
+.. function:: extract_features(data, window_df, window_length_s=None, sampling_frequency=None, overlap=None, preprocessing: bool = True)
+
+   Extract features from sensor data.
+
+   :param data: The input DataFrame containing sensor data.
+   :type data: pandas.DataFrame
+   :param window_df: The DataFrame to store the extracted features.
+   :type window_df: pandas.DataFrame
+   :param window_length_s: The length of the window in seconds.
+   :type window_length_s: int, optional
+   :param sampling_frequency: The sampling frequency of the sensor data.
+   :type sampling_frequency: int, optional
+   :param overlap: The overlap between consecutive windows.
+   :type overlap: float, optional
+   :param preprocessing: A boolean indicating whether preprocessing columns are included.
+   :type preprocessing: bool, optional
+   :return: The DataFrame containing the extracted features.
+   :rtype: pandas.DataFrame
+
+   This function extracts features from the sensor data stored in the input DataFrame. It divides the data into windows of specified length and overlap, calculates statistical measures for each window, and adds the extracted features to the provided DataFrame.
+
+   Example::
+
+      >>> extract_features(data, window_df, window_length_s=60, sampling_frequency=100, overlap=0.5)
+      # DataFrame with extracted features
+
+   The function iterates over the input DataFrame and extracts features for each window. It calculates statistical measures for each sensor column in the window data, including mean, standard deviation, median, etc. Preprocessing columns like 'anon_id' and 'PD' are optionally included in the calculation of statistical measures.
+
+'''
 
 
 def extract_features(data, window_df, window_length_s=None, sampling_frequency=None, overlap=None,
