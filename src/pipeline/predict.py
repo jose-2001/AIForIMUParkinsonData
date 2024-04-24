@@ -10,7 +10,7 @@ from src.settings import ROOT_DIR
 from src.data.imu_helper import ImuData
 from src.data.firebase_json_downloader import get_measurement, get_data_summary
 from src.data.json_formater import imu_data2dataframe, measurement_has_valid_keys
-from src.data.characteristics_extraction import generar_nombres_columnas, extraer_caracteristicas
+from src.data.characteristics_extraction import generate_column_names, extract_features
 from src.preprocessing.summarizer_preprocessing import predict_symptom, BEST_MODEL_BY_SYMPTOM
 from src.pipeline.summarizer_usage import predict_parkinson
 
@@ -29,9 +29,9 @@ def execute_prediction(patient_id: str):
         measure = get_measurement(unidecode(patient_id), date)
         patient_df = _from_measure2dataframe(patient_id, date, measure)
 
-        df_columns = generar_nombres_columnas(preprocessing=False)
+        df_columns = generate_column_names(preprocessing=False)
         patient_df_features = pd.DataFrame(columns=df_columns)
-        patient_df_features = extraer_caracteristicas(patient_df, patient_df_features, preprocessing=False)
+        patient_df_features = extract_features(patient_df, patient_df_features, preprocessing=False)
 
         symptoms = ['tremor', 'posture', 'laterality', 'asa', 'dysk']
         results = {}
