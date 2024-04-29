@@ -1,3 +1,4 @@
+import os
 import json
 from unidecode import unidecode
 from dotenv import load_dotenv
@@ -14,56 +15,48 @@ from src.data.characteristics_extraction import generar_nombres_columnas, extrae
 from src.preprocessing.summarizer_preprocessing import predict_symptom, BEST_MODEL_BY_SYMPTOM
 from src.pipeline.summarizer_usage import predict_parkinson
 
+RESULTS_PATH = str(ROOT_DIR) + '/results/predictions'
 
-def execute_prediction(patient_id: str):
-    dates = _get_patient_measurement_dates(patient_id)
-    date = _get_desired_date_by_user(dates)
 
-    if date == str(len(dates) + 1):
-        # Get all dates
-        # Transform all to DF
-        # Execute predictions for all dates
-        pass
-    else:
-        date = dates[date]
-        measure = get_measurement(unidecode(patient_id), date)
-        patient_df = _from_measure2dataframe(patient_id, date, measure)
+def execute_prediction(patient_id: str, date: str = None):
+    results = {}
+    measure = get_measurement(unidecode(patient_id), date)
+    patient_df = _from_measure2dataframe(patient_id, date, measure)
 
-        df_columns = generar_nombres_columnas(preprocessing=False)
-        patient_df_features = pd.DataFrame(columns=df_columns)
-        patient_df_features = extraer_caracteristicas(patient_df, patient_df_features, preprocessing=False)
+    df_columns = generar_nombres_columnas(preprocessing=False)
+    patient_df_features = pd.DataFrame(columns=df_columns)
+    patient_df_features = extraer_caracteristicas(patient_df, patient_df_features, preprocessing=False)
 
-        symptoms = ['tremor', 'posture', 'laterality', 'asa', 'dysk']
-        results = {}
+    symptoms = ['tremor', 'posture', 'laterality', 'asa', 'dysk']
 
-        for symptom in symptoms:
-            symptom: str
+    for symptom in symptoms:
+        symptom: str
+        if 'laterality' in symptom:
+            results[f'{symptom}_left'] = list()
+            results[f'{symptom}_right'] = list()
+        else:
+            results[symptom] = list()
+
+        for index, value in patient_df_features.iterrows():
+            model = BEST_MODEL_BY_SYMPTOM[symptom]
+            prediction = predict_symptom(symptom, model, value)
             if 'laterality' in symptom:
-                results[f'{symptom}_left'] = list()
-                results[f'{symptom}_right'] = list()
+                prediction = prediction[0]
+                results[f'{symptom}_right'].append(prediction[1])
+                results[f'{symptom}_left'].append(prediction[2])
             else:
-                results[symptom] = list()
+                prediction = prediction[0][1]
+                results[symptom].append(prediction)
 
-            for index, value in patient_df_features.iterrows():
-                model = BEST_MODEL_BY_SYMPTOM[symptom]
-                prediction = predict_symptom(symptom, model, value)
-                if 'laterality' in symptom:
-                    prediction = prediction[0]
-                    results[f'{symptom}_right'].append(prediction[1])
-                    results[f'{symptom}_left'].append(prediction[2])
-                else:
-                    prediction = prediction[0][1]
-                    results[symptom].append(prediction)
+        if 'laterality' in symptom:
+            results[f'{symptom}_right'] = np.mean(results[f'{symptom}_right'])
+            results[f'{symptom}_left'] = np.mean(results[f'{symptom}_left'])
+        else:
+            results[symptom] = np.mean(results[symptom])
 
-            if 'laterality' in symptom:
-                results[f'{symptom}_right'] = np.mean(results[f'{symptom}_right'])
-                results[f'{symptom}_left'] = np.mean(results[f'{symptom}_left'])
-            else:
-                results[symptom] = np.mean(results[symptom])
-
-        predict_parkinson(patient_df_features)
-        results['PD'] = np.mean(patient_df_features['PD'].to_numpy())
-        return results
+    predict_parkinson(patient_df_features)
+    results['PD'] = np.mean(patient_df_features['PD'].to_numpy())
+    return results
 
 
 def _from_measure2dataframe(patient_id: str, date: str, measure: dict) -> pd.DataFrame:
@@ -103,9 +96,36 @@ def _get_patient_measurement_dates(patient_id: str) -> list:
     return dates
 
 
+def _save_prediction(results_dict: dict, patient_id: str) -> None:
+    patient_path = RESULTS_PATH + f'/{patient_id}/'
+    os.makedirs(patient_path, exist_ok=True)
+    print(len(results.keys()))
+    if len(results.keys()) > 1:
+        date_measure = 'all_measures'
+    else:
+        date_measure = list(results.keys())[0]
+
+    file_name = patient_path + f'prediction_{date_measure}.json'
+    with open(file_name, 'w') as file:
+        json.dump(results_dict, file)
+    file.close()
+    print(f'Prediction saved in {file_name}')
+
+
 if __name__ == '__main__':
     load_dotenv()
     warnings.filterwarnings('ignore')
     patient_cc = str(input("Please enter the patient's cc: "))
-    results = execute_prediction(patient_cc)
-    print(results)
+
+    dates = list(set(_get_patient_measurement_dates(patient_cc)))
+    date = _get_desired_date_by_user(dates)
+
+    results = {}
+    if date == str(len(dates) + 1):
+        for date in dates:
+            results[date] = execute_prediction(patient_cc, date)
+    else:
+        date = dates[date]
+        results[date] = execute_prediction(patient_cc, date)
+
+    _save_prediction(results, patient_cc)
