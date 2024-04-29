@@ -4,6 +4,8 @@
 #Enviroment variables
 .env
 
+#Results of predictions
+/results/predictions/
 
 #Cache files
 __pycache__/
