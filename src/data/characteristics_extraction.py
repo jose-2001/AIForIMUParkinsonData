@@ -2,130 +2,218 @@ import pandas as pd
 import numpy as np
 from scipy.stats import skew, kurtosis
 
-columnas_sensores_default = ['imu_gyroX_right', 'imu_gyroY_right', 'imu_gyroZ_right', 'imu_accX_right',
-                             'imu_accY_right', 'imu_accZ_right', 'imu_gyroX_left', 'imu_gyroY_left', 'imu_gyroZ_left',
-                             'imu_accX_left', 'imu_accY_left', 'imu_accZ_left', 'imu_gyroX_spine', 'imu_gyroY_spine',
-                             'imu_gyroZ_spine', 'imu_accX_spine', 'imu_accY_spine', 'imu_accZ_spine',
-                             'imu_angleX_right', 'imu_angleY_right', 'imu_angleZ_right', 'imu_angleX_left',
-                             'imu_angleY_left', 'imu_angleZ_left', 'imu_angleX_spine', 'imu_angleY_spine',
-                             'imu_angleZ_spine', 'imu_angularX_left', 'imu_angularY_left', 'imu_angularZ_left',
-                             'imu_angularX_right', 'imu_angularY_right', 'imu_angularZ_right', 'imu_angularX_spine',
-                             'imu_angularY_spine', 'imu_angularZ_spine']
-medidas_estadisticas_default = ['mean', 'std', 'mean_abs_dev',
+default_sensor_columns = ['imu_gyroX_right', 'imu_gyroY_right', 'imu_gyroZ_right', 'imu_accX_right',
+                          'imu_accY_right', 'imu_accZ_right', 'imu_gyroX_left', 'imu_gyroY_left', 'imu_gyroZ_left',
+                          'imu_accX_left', 'imu_accY_left', 'imu_accZ_left', 'imu_gyroX_spine', 'imu_gyroY_spine',
+                          'imu_gyroZ_spine', 'imu_accX_spine', 'imu_accY_spine', 'imu_accZ_spine',
+                          'imu_angleX_right', 'imu_angleY_right', 'imu_angleZ_right', 'imu_angleX_left',
+                          'imu_angleY_left', 'imu_angleZ_left', 'imu_angleX_spine', 'imu_angleY_spine',
+                          'imu_angleZ_spine', 'imu_angularX_left', 'imu_angularY_left', 'imu_angularZ_left',
+                          'imu_angularX_right', 'imu_angularY_right', 'imu_angularZ_right', 'imu_angularX_spine',
+                          'imu_angularY_spine', 'imu_angularZ_spine']
+default_statistical_measures = ['mean', 'std', 'mean_abs_dev',
                                 'min', 'max', 'range', 'median', 'median_abs_dev',
                                 'interquartile_range', 'negative_count', 'positive_count', 'above_mean_count',
                                 'local_maxima_count', 'skewness', 'kurtosis']
-frecuencia_muestreo_default = 50  # Hz
-longitud_ventana_s_default = 1  # segundos
-overlap_default = 0.5  # 50%
+default_sampling_frequency = 50  # Hz
+default_window_length_s = 1  # seconds
+default_overlap = 0.5  # 50%
+
+'''
+.. function:: calculate_statistical_measures(column)
+
+   Calculate statistical measures for the given column.
+
+   :param column: A pandas Series representing the column for which statistical measures are calculated.
+   :type column: pandas.Series
+
+   :return: A dictionary containing various statistical measures.
+   :rtype: dict
+
+   This function calculates the following statistical measures for the given column:
+
+   - **mean**: Mean of the column.
+   - **std**: Standard deviation of the column.
+   - **mean_abs_dev**: Mean absolute deviation of the column.
+   - **min**: Minimum value of the column.
+   - **max**: Maximum value of the column.
+   - **range**: Range of the column (max - min).
+   - **median**: Median of the column.
+   - **median_abs_dev**: Median absolute deviation of the column.
+   - **interquartile_range**: Interquartile range (75th percentile - 25th percentile) of the column.
+   - **negative_count**: Number of negative values in the column.
+   - **positive_count**: Number of positive values in the column.
+   - **above_mean_count**: Number of values above the mean of the column.
+   - **local_maxima_count**: Number of local maxima in the column.
+   - **skewness**: Skewness of the column.
+   - **kurtosis**: Kurtosis of the column.
+
+'''
 
 
-def calcular_medidas_estadisticas(columna):
-    medidas = {
-        'mean': np.mean(columna),
-        'std': np.std(columna),
-        'mean_abs_dev': np.mean(np.abs(columna - np.mean(columna))),
-        'min': np.min(columna),
-        'max': np.max(columna),
-        'range': np.max(columna) - np.min(columna),
-        'median': np.median(columna),
-        'median_abs_dev': np.median(np.abs(columna - np.median(columna))),
-        'interquartile_range': np.percentile(columna, 75) - np.percentile(columna, 25),
-        'negative_count': np.sum(columna < 0),
-        'positive_count': np.sum(columna > 0),
-        'above_mean_count': np.sum(columna > np.mean(columna)),
-        'local_maxima_count': len(columna) - np.sum((columna.shift(-1) < columna) & (columna.shift(1) < columna)),
-        'skewness': skew(columna),
-        'kurtosis': kurtosis(columna)
+def calculate_statistical_measures(column):
+    measures = {
+        'mean': np.mean(column),
+        'std': np.std(column),
+        'mean_abs_dev': np.mean(np.abs(column - np.mean(column))),
+        'min': np.min(column),
+        'max': np.max(column),
+        'range': np.max(column) - np.min(column),
+        'median': np.median(column),
+        'median_abs_dev': np.median(np.abs(column - np.median(column))),
+        'interquartile_range': np.percentile(column, 75) - np.percentile(column, 25),
+        'negative_count': np.sum(column < 0),
+        'positive_count': np.sum(column > 0),
+        'above_mean_count': np.sum(column > np.mean(column)),
+        'local_maxima_count': len(column) - np.sum((column.shift(-1) < column) & (column.shift(1) < column)),
+        'skewness': skew(column),
+        'kurtosis': kurtosis(column)
     }
-    return medidas
+    return measures
 
 
-def generar_nombres_columnas(columnas_sensores=None, medidas_estadisticas=None, preprocessing: bool = True):
-    if columnas_sensores is None:
-        columnas_sensores = columnas_sensores_default
-    if medidas_estadisticas is None:
-        medidas_estadisticas = medidas_estadisticas_default
+'''
+.. function:: generate_column_names(sensor_columns=None, statistical_measures=None, preprocessing: bool = True)
 
-    nombres_columnas = ['date_measure', 'window_number', 'first_timestamp']
+   Generate column names for sensor data.
+
+   :param sensor_columns: A list of sensor column names.
+   :type sensor_columns: list, optional
+   :param statistical_measures: A list of statistical measures to be calculated for each sensor column.
+   :type statistical_measures: list, optional
+   :param preprocessing: A boolean indicating whether preprocessing columns should be included.
+   :type preprocessing: bool, optional
+   :return: A list of column names.
+   :rtype: list
+
+   This function generates column names for sensor data based on the specified sensor columns and statistical measures. By default, it includes preprocessing columns.
+   If ``preprocessing`` is set to ``False``, the function excludes preprocessing columns:
+
+   Example::
+
+      >>> generate_column_names(sensor_columns=['acceleration', 'temperature'], statistical_measures=['mean', 'std'], preprocessing=False)
+      ['date_measure', 'window_number', 'first_timestamp', 'acceleration_mean', 'acceleration_std', 'temperature_mean', 'temperature_std']
+
+'''
+
+
+def generate_column_names(sensor_columns=None, statistical_measures=None, preprocessing: bool = True):
+    if sensor_columns is None:
+        sensor_columns = default_sensor_columns
+    if statistical_measures is None:
+        statistical_measures = default_statistical_measures
+
+    column_names = ['date_measure', 'window_number', 'first_timestamp']
     if preprocessing:
-        nombres_columnas.append('anon_id')
+        column_names.append('anon_id')
 
-    for columna in columnas_sensores:
-        for medida in medidas_estadisticas:
-            nombre_columna = f"{columna}_{medida}"
-            nombres_columnas.append(nombre_columna)
+    for column in sensor_columns:
+        for measure in statistical_measures:
+            column_name = f"{column}_{measure}"
+            column_names.append(column_name)
 
     if preprocessing:
-        nombres_columnas.append('PD')
+        column_names.append('PD')
 
-    return nombres_columnas
+    return column_names
 
 
-def extraer_caracteristicas(data, df_ventanas, longitud_ventana_s=None, frecuencia_muestreo=None, overlap=None,
-                            preprocessing: bool = True):
-    if longitud_ventana_s is None:
-        longitud_ventana_s = longitud_ventana_s_default
-    if frecuencia_muestreo is None:
-        frecuencia_muestreo = frecuencia_muestreo_default
+'''
+.. function:: extract_features(data, window_df, window_length_s=None, sampling_frequency=None, overlap=None, preprocessing: bool = True)
+
+   Extract features from sensor data.
+
+   :param data: The input DataFrame containing sensor data.
+   :type data: pandas.DataFrame
+   :param window_df: The DataFrame to store the extracted features.
+   :type window_df: pandas.DataFrame
+   :param window_length_s: The length of the window in seconds.
+   :type window_length_s: int, optional
+   :param sampling_frequency: The sampling frequency of the sensor data.
+   :type sampling_frequency: int, optional
+   :param overlap: The overlap between consecutive windows.
+   :type overlap: float, optional
+   :param preprocessing: A boolean indicating whether preprocessing columns are included.
+   :type preprocessing: bool, optional
+   :return: The DataFrame containing the extracted features.
+   :rtype: pandas.DataFrame
+
+   This function extracts features from the sensor data stored in the input DataFrame. It divides the data into windows of specified length and overlap, calculates statistical measures for each window, and adds the extracted features to the provided DataFrame.
+
+   Example::
+
+      >>> extract_features(data, window_df, window_length_s=60, sampling_frequency=100, overlap=0.5)
+      # DataFrame with extracted features
+
+   The function iterates over the input DataFrame and extracts features for each window. It calculates statistical measures for each sensor column in the window data, including mean, standard deviation, median, etc. Preprocessing columns like 'anon_id' and 'PD' are optionally included in the calculation of statistical measures.
+
+'''
+
+
+def extract_features(data, window_df, window_length_s=None, sampling_frequency=None, overlap=None,
+                     preprocessing: bool = True):
+    if window_length_s is None:
+        window_length_s = default_window_length_s
+    if sampling_frequency is None:
+        sampling_frequency = default_sampling_frequency
     if overlap is None:
-        overlap = overlap_default
-    filas_por_ventana = int(longitud_ventana_s * frecuencia_muestreo)
-    paso_tiempo = int(filas_por_ventana * (1 - overlap))
-    # Iterar sobre los datos originales en el DataFrame
+        overlap = default_overlap
+    rows_per_window = int(window_length_s * sampling_frequency)
+    paso_tiempo = int(rows_per_window * (1 - overlap))
+    # Iterate over dataframe data
     window_number = 1
-    for i in range(0, len(data) - filas_por_ventana + 1, paso_tiempo):
-        # Seleccionar la primera fila de cada ventana
-        primera_fila_ventana = data.iloc[i]
+    for i in range(0, len(data) - rows_per_window + 1, paso_tiempo):
+        # Select the first row of each window
+        window_first_row = data.iloc[i]
 
-        # Seleccionar los valores relevantes de la fila
+        # Select relevant row values
         anon_id, PD = None, None
-        date_measure = primera_fila_ventana['date_measure']
-        first_timestamp = primera_fila_ventana['time_stamp']
+        date_measure = window_first_row['date_measure']
+        first_timestamp = window_first_row['time_stamp']
         if preprocessing:
-            anon_id = primera_fila_ventana['anon_id']
-            PD = primera_fila_ventana['PD']
+            anon_id = window_first_row['anon_id']
+            PD = window_first_row['PD']
 
-        # Seleccionar la ventana incluyendo tanto los valores de los sensores como los metadatos
-        ventana = data.iloc[i:i + filas_por_ventana]
+        # Select window including both sensor values and metadata
+        ventana = data.iloc[i:i + rows_per_window]
 
-        # Verificar si los valores en la primera y última fila de la ventana son iguales
+        # Verify the values of the first row match the last in the window
         comparable_columns = ['date_measure']
         if preprocessing:
             comparable_columns = comparable_columns + ['anon_id', 'PD']
 
         while len(ventana) > 1 and not ventana.iloc[0][comparable_columns].equals(ventana.iloc[-1][comparable_columns]):
-            ventana = ventana.iloc[:-1]  # Reducir la longitud de la ventana eliminando la última fila
+            ventana = ventana.iloc[:-1]  # Reduce window length by dropping the last row until values are equal
 
-        # Si la ventana se vacía pero aún no se cumple la condición, salir del bucle
+        # If the window empties but condition is still not met, break loop
         if len(ventana) == 1 and not ventana.iloc[0][comparable_columns].equals(ventana.iloc[-1][comparable_columns]):
             break
 
-        # Eliminar los valores de 'anon_id','date_measure'y'PD' de la ventana antes de calcular las medidas estadísticas
+        # Remove 'anon_id','date_measure', and 'PD' values from the window before calculating statistical measures.
         if preprocessing:
-            ventana_valores_sensor = ventana.drop(['anon_id', 'date_measure', 'time_stamp', 'PD'], axis=1)
+            window_sensor_values = ventana.drop(['anon_id', 'date_measure', 'time_stamp', 'PD'], axis=1)
         else:
-            ventana_valores_sensor = ventana.drop(['patient_id', 'date_measure', 'time_stamp'], axis=1)
+            window_sensor_values = ventana.drop(['patient_id', 'date_measure', 'time_stamp'], axis=1)
 
-        # Calcular las medidas estadísticas de la ventana para cada columna
-        datos_ventana = {
+        # Calculate the statistical measures of the window for each column.
+        window_data = {
             'date_measure': date_measure,
             'window_number': window_number,
             'first_timestamp': first_timestamp
         }
 
         if preprocessing:
-            datos_ventana['anon_id'] = anon_id
-            datos_ventana['PD'] = PD
+            window_data['anon_id'] = anon_id
+            window_data['PD'] = PD
 
-        for sensor_col in ventana_valores_sensor.columns:
-            medidas = calcular_medidas_estadisticas(ventana_valores_sensor[sensor_col])
-            for medida, medida_valor in medidas.items():
-                nombre_columna = f"{sensor_col}_{medida}"
-                datos_ventana[nombre_columna] = medida_valor
+        for sensor_col in window_sensor_values.columns:
+            measures = calculate_statistical_measures(window_sensor_values[sensor_col])
+            for measure, measure_value in measures.items():
+                column_name = f"{sensor_col}_{measure}"
+                window_data[column_name] = measure_value
 
-        # Añadir los datos de la ventana al DataFrame
-        df_ventanas = pd.concat([df_ventanas, pd.DataFrame(datos_ventana, index=[0])], ignore_index=True)
+        # Add window data to the DataFrame.
+        window_df = pd.concat([window_df, pd.DataFrame(window_data, index=[0])], ignore_index=True)
 
         window_number += 1
-    return df_ventanas
+    return window_df
