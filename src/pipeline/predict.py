@@ -74,15 +74,15 @@ def _get_desired_date_by_user(dates: list) -> int:
         print(f'{i + 1}. {dates[i]}')
 
     print(f'{len(dates) + 1}. Use all')
-    date = None
-    while date is None:
-        date = int(input('Please select one of the dates (Enter the number): ')) - 1
+    date_index = None
+    while date_index is None:
+        date_index = int(input('Please select one of the dates (Enter the number): ')) - 1
 
-        if date not in range(0, len(dates) + 1):
+        if date_index not in range(0, len(dates) + 1):
             print('Invalid date. Please try again.')
-            date = None
+            date_index = None
 
-    return date
+    return date_index
 
 
 def _get_patient_measurement_dates(patient_id: str) -> list:
@@ -118,14 +118,15 @@ if __name__ == '__main__':
     patient_cc = str(input("Please enter the patient's cc: "))
 
     dates = list(set(_get_patient_measurement_dates(patient_cc)))
-    date = _get_desired_date_by_user(dates)
+    dates = sorted(dates)
+    date_idx = _get_desired_date_by_user(dates)
 
     results = {}
-    if date == str(len(dates) + 1):
+    if date_idx == str(len(dates) + 1):
         for date in dates:
             results[date] = execute_prediction(patient_cc, date)
     else:
-        date = dates[date]
+        date = dates[date_idx]
         results[date] = execute_prediction(patient_cc, date)
 
     _save_prediction(results, patient_cc)
